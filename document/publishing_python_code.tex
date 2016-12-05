@@ -1,0 +1,301 @@
+\documentclass{article}
+
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xstring}
+\usepackage{graphicx}
+
+% Move the title up a bit.
+\usepackage{titling}
+\setlength{\droptitle}{-10ex}
+
+% Describe how code should be syntax-highlighted.
+\usepackage{minted}
+\usemintedstyle{borland}
+
+% Don't use curly quotes in code listings.
+\usepackage{upquote}
+\usepackage{textcomp}
+\AtBeginDocument{%
+\def\PYZsq{\textquotesingle}%
+}
+
+% Use the "courier" font for code listings.  Unlike the default monospace font, 
+% courier supports bold and doesn't look funny when italicized.
+\usepackage{courier}
+
+% Describe how the TOC should be formatted.
+\usepackage{tocloft}
+\renewcommand\cftsecleader{\cftdotfill{\cftdotsep}}
+\renewcommand\cftsecfont{\normalfont}
+\renewcommand\cftsecpagefont{\normalfont}
+\setlength{\cftbeforesecskip}{0.0ex}
+
+% Specify how hyperlinks should be colored.
+\hypersetup{
+  colorlinks   = true,
+  urlcolor     = blue,
+  linkcolor    = black,
+  citecolor    = black
+}
+
+% In description lists, start each description on it's own line.
+\usepackage{enumitem}
+\setlist[description]{style=nextline}
+
+% Don't number sections, and start each section on a new page.
+\setcounter{secnumdepth}{0}
+\newcommand{\sectionbreak}{\clearpage}
+
+\makeatletter
+\newcommand\organizedtoc{%
+    \subsubsection*{Making the code available}\@starttoc{use}%
+    \subsubsection*{Documenting the code}\@starttoc{doc}%
+    \subsubsection*{Testing the code}\@starttoc{test}}
+\newcommand\organizedsection[2]{
+ \section{#2}
+ \addcontentsline{#1}{section}{#2}
+ \setcounter{footnote}{1}}
+\makeatother
+
+% Define a command to typeset links in a way that's readable in print.
+\usepackage{xifthen}
+\newcommand{\link}[2]{#1\footnote{\url{#2}}}
+
+% Define a command for typesetting module names.  A URL can optionally be 
+% given, in which case it will be added as a footnote and a hyperlink.
+\usepackage{xifthen}
+\newcommand{\module}[2][]{%
+ \ifthenelse{\isempty{#1}}%
+ {\texttt{#2}}%
+ {\link{\texttt{#2}}{#1}}%
+}
+
+% Use symbols to mark footnotes.
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
+% Define a command to include files from the kbkdna module.
+\newcommand{\kbkdnafile}[2]{%
+\begin{listing}[h]%
+ \inputminted[fontsize=\small]{#1}{../kbkdna/#2}%
+ \caption{\texttt{#2}}%
+\end{listing}}
+
+\begin{document}
+
+\title{How to publish python code}
+\author{Kale Kundert}
+\date{2016 Kortemme Lab Retreat}
+\maketitle{}
+
+Once you get some code to work, it's easy to not bother making that code easy 
+for other people to use.  Usually you have more pressing things to worry about, 
+and it's hard to even know what you could do to help other people use your code 
+anyway.  However, especially as scientists, we have a responsibility to make 
+sure the code we write easily is accessible to anyone who wants or needs to use 
+it.
+
+In this tutorial, we'll walk through all the steps required to publish some 
+python code.  The example code we'll be working with will manipulate DNA 
+sequences in simple ways.  Specifically, it'll calculate lengths, GC contents, 
+and reverse complements.  We'll expose this functionality both as a library and 
+as a command-line tool.
+
+Broadly speaking, there are three things we need to do to publish code.  These 
+are making the code available, documenting the code, and testing the code.  
+Each of these larger objectives can be broken down into a handful of very 
+concrete steps which this tutorial will describe:
+
+\organizedtoc
+
+\organizedsection{use}{Organizing your files}
+
+Most python projects organize their files in the same way.  This standard 
+directory layout is pretty simple and works well in every situation I've ever 
+encountered.  By adhering to it, you make your code easier for others to grok 
+and you avoid getting tied into knots by bad organizational decisions.
+
+The first step is to choose a name for your project.  This name has to be 
+unique (i.e. there can't be any other python packages with the same name) and 
+it should somehow reflect what your code actually does.  The name I'll use for 
+this tutorial is \module{kbkdna}, because my initials are \texttt{kbk} and the 
+code will deal with DNA.  You should use your own initials instead, because you 
+won't be able to publish a package with the same name as mine.
+
+\begin{listing}[h]
+ \begin{minted}[fontsize=\small]{bash}
+ # Make a directory for the project and move into it.
+ $ mkdir kbkdna
+ $ cd kbkdna
+
+ # Make a README file.
+ $ touch README.rst
+
+ # Make a LICENSE file.
+ $ touch LICENSE.txt
+
+ # Make a directory for your python code.
+ $ mkdir kbkdna
+ $ touch kbkdna/__init__.py
+
+ # Make a directory for your documentation.
+ $ mkdir docs
+
+ # Make a directory for your tests.
+ $ mkdir tests
+
+ # Make sure everything was created properly.
+ $ ls
+ docs/  kbkdna/  README.rst  LICENSE.txt
+\end{minted}
+\end{listing}
+
+\organizedsection{misc}{Writing some example functions}
+
+Below are the four functions making up the library we want to publish.  Nothing 
+about this code is particular to how we will publish it; it's just regular 
+python code.  Copy it into \texttt{kbkdna/dna.py}:
+
+\kbkdnafile{python}{kbkdna/dna.py}
+
+\organizedsection{doc}{Providing command-line help with \module{docopt}}
+
+Along with our library, we want to provide a program to manipulate DNA 
+sequences from the command-line.  This program will read a sequence and a 
+desired manipulation (i.e. length, GC content, reverse complement) from the 
+command line, and will print out the result of that manipulation.  Documenting 
+the arguments that this program expects is a crucial part of making this 
+program usable for other people.  This should be done in two ways:
+
+\begin{enumerate}
+ \item If the program receives arguments that don't make sense, it should print 
+  a brief usage hint.
+ \item If the user provides the \texttt{-h} or \texttt{--help} flag, the 
+  program should print a detailed help message.  This message should include a 
+  few sentences saying what the program is supposed to do and a description of 
+  every single argument the program takes.
+\end{enumerate}
+
+There are a number of ways to do both these things in python, but the 
+\module[http://docopt.org/]{docopt} module is by far my favorite.  We just need 
+to write a help message at the top of our script describing the arguments we 
+expect.  \module{docopt} will read that message and use it to parse the 
+command-line arguments for us.  If there are any problems, it will print a 
+usage hint and end the program.  If not, it will give us a dictionary 
+containing the parsed arguments.
+
+The thing I love about \texttt{docopt} is that it combines a good help message, 
+which is good for users, with easy command-line argument parsing, which is good 
+for me.  I've found that I'm much more likely to write documentation when 
+there's an immediate benefit in it for me!
+
+There's an example on the following page.  Copy it into \texttt{kbkdna/cli.py}.  
+There are parts of this code that are particular to how we will publish it, 
+specifically the relative import and the main function that's never called, so 
+don't bother trying to run it yet.
+
+\kbkdnafile{python}{kbkdna/cli.py}
+
+\organizedsection{doc}{Writing a \texttt{README.rst} file}
+
+A \texttt{README} file should briefly explain what the project is supposed to 
+do, how to install it, and how to use it.  I also like to include a few 
+``badges'' to advertise that the project can be installed using the standard 
+tools, that it passes its tests, and that its documentation is available online 
+(which are all things we'll get to in this tutorial).
+
+The \texttt{*.rst} suffix means that the file is reStructuredText.  This is a 
+simple file format is supposed to look good as raw text while still being easy 
+to convert to HTML.  The two important things to know are that you can start a 
+new section by underlining the title of that section with equal signs or 
+dashes, and you enter a block of code by ending the previous paragraph with two 
+colons and indenting the code block.
+
+\kbkdnafile{text}{README.rst}
+
+\organizedsection{use}{Choosing a license}
+
+Choosing a license is important because it lets other people know how they can 
+use your code.  The website \url{choosealicense.com} is a good resource where 
+you can compare a number common licenses and find one you like.  The two most 
+common choices for academic code are the MIT license and the GPLv3 license:
+
+\begin{description}
+\item[MIT License] No restrictions on how your code can be used.  This allows 
+ your code to be included with commercial software.
+\item[GPLv3 License] Requires that any derivatives of your code be made 
+ publicly available.  This effectively forbids your code from being included 
+ with commercial software.
+\end{description}
+
+I'll use the MIT license for \module{kbkdna} because it's short enough to fit 
+on one page.
+
+\kbkdnafile{text}{LICENSE.txt}
+
+\organizedsection{use}{Writing \texttt{setup.py} and uploading to PyPI}
+
+The best way to install python software that other people have written is to 
+use a command called \module[https://packaging.python.org/installing/]{pip}.  
+You just need to give the name of the software you want to install.  For 
+example, to install \module{docopt}:
+
+\begin{minted}{bash}
+ $ pip install docopt
+\end{minted}
+
+In order for other people to be able to install our software using 
+\module{pip}, we need to upload it to the \link{Python Package Index 
+(PyPI)}{https://pypi.python.org/pypi}, a global repository of python software 
+that anyone can contribute to.  The first step in this process is to specify 
+some basic information about our project in a file called \texttt{setup.py}.
+
+\kbkdnafile{python}{setup.py}
+
+The \texttt{name} field is the name \module{pip} will use to refer to our 
+project, e.g. \texttt{pip install kbkdna}.  The \texttt{packages} field is a 
+list of directories containing python code that will be installed.  The 
+\texttt{install\_requires} field is a list of other packages on PyPI that our 
+project makes use of.  Whenever \module{pip} installs our project, it will 
+automatically install these as well.  The rest of the fields are just optional 
+metadata and are hopefully pretty self-explanatory.
+
+The next step is to register an account on PyPI:
+
+\begin{figure}[h]
+ \frame{\includegraphics[width=\textwidth]{screenshots/pypi}}
+ \caption{\url{https://pypi.python.org/pypi}}
+\end{figure}
+
+Once you've done that, the third an final step is to run the following two 
+commands to register and upload your project.  You only need to run the 
+\texttt{register} command once for each of your projects.  You can run the 
+\texttt{sdist upload} command any time you want to upload a new version of your 
+project, but you need to increment the version number in \texttt{setup.py} each 
+time.
+
+\begin{minted}{bash}
+ $ python setup.py register
+ $ python setup.py sdist upload
+\end{minted}
+
+\organizedsection{doc}{Writing documentation with Sphinx}
+
+Sphinx is a tool that 
+
+\begin{minted}{bash}
+ $ pip install sphinx
+ $ sphinx-quickstart docs
+\end{minted}
+
+\organizedsection{doc}{Uploading documentation to ReadTheDocs}
+
+\organizedsection{test}{Writing tests with \module{py.test}}
+
+\organizedsection{test}{Running tests on TravisCI}
+
+\organizedsection{misc}{Using \module{cookiecutter}}
+
+\end{document}
+

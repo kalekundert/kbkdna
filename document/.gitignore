@@ -1,0 +1,8 @@
+document.tex
+*.pdf
+*.use
+*.doc
+*.test
+*.log
+*.out
+*.aux
