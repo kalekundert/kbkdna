@@ -6,3 +6,4 @@ document.tex
 *.log
 *.out
 *.aux
+_minted*
