@@ -1,7 +1,5 @@
 #!/usr/bin/env python2
 
-from __future__ import division
-
 def reverse(seq):
     """Return the reverse of the given sequence (i.e. 3' to 
     5')."""
