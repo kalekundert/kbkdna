@@ -1,9 +1,10 @@
 document.tex
-*.pdf
-*.use
-*.doc
-*.test
-*.log
-*.out
 *.aux
+*.doc
+*.log
+*.misc
+*.out
+*.pdf
+*.test
+*.use
 _minted*
