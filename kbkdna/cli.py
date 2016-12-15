@@ -36,5 +36,5 @@ def main():
     if args['gc']:
         gc = dna.gc_content(seq)
         if args['--fraction']: print gc
-        else: print '{.2f}\%'.format(gc / 100)
+        else: print '{:.2f}%'.format(gc / 100.)
 
