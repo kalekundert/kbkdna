@@ -29,6 +29,9 @@
 \renewcommand\cftsecpagefont{\normalfont}
 \setlength{\cftbeforesecskip}{0.0ex}
 
+\usepackage{titlesec}
+\titlespacing\subsubsection{0pt}{12pt}{0pt}
+
 % Specify how hyperlinks should be colored.
 \hypersetup{
   colorlinks = true,
@@ -45,12 +48,16 @@
 \setcounter{secnumdepth}{0}
 \newcommand{\sectionbreak}{\clearpage}
 
+% Reduce the space between figures and their captions.
+\usepackage[skip=2ex]{caption}
+
 % Define commands for managing the TOC.
 \makeatletter
 \newcommand\organizedtoc{%
     \subsubsection*{Making the code available}\@starttoc{use}%
+    \subsubsection*{Testing the code}\@starttoc{test}%
     \subsubsection*{Documenting the code}\@starttoc{doc}%
-    \subsubsection*{Testing the code}\@starttoc{test}}
+    \subsubsection*{Other topics}\@starttoc{misc}}
 \newcommand\organizedsection[2]{
  \section{#2}
  \addcontentsline{#1}{section}{#2}
@@ -74,7 +81,7 @@
 % Define a command to include files from the kbkdna module.
 \newcommand{\kbkdnafile}[2]{%
 \begin{listing}[h]%
- \inputminted[fontsize=\small]{#1}{../kbkdna/#2}%
+ \inputminted[fontsize=\small]{#1}{../#2}%
  \caption{\texttt{\detokenize{#2}}}%
 \end{listing}}
 
@@ -98,7 +105,7 @@ and reverse complements.  We'll expose this functionality both as a library and
 as a command-line tool.
 
 Broadly speaking, there are three things we need to do to publish code.  These 
-are making the code available, documenting the code, and testing the code.  
+are making the code available, testing the code, and documenting the code.  
 Each of these larger objectives can be broken down into a handful of very 
 concrete steps which this tutorial will describe:
 
@@ -147,40 +154,42 @@ docs/  kbkdna/  tests/  README.rst  LICENSE.txt
 \end{bashcode}
 \end{listing}
 
-\organizedsection{use}{Hosting your code on Github}
+\organizedsection{doc}{Writing a \texttt{README.rst} file}
 
-Version control is useful for many reasons, but two in particular are worth 
-mentioning here.  First, it allows you to go back to old versions of your code 
-if you have to, which allows you to tinker with working code more fearlessly.  
-Second, it makes it easy to share your code with other people and for other 
-people to contribute to your project.  This is especially true if you host your 
-repository on a popular site like \link{GitHub}{https://github.com/}.
+A \texttt{README} file should briefly explain what the project is supposed to 
+do, how to install it, and how to use it.  I also like to include a few 
+``badges'' to advertise that the project can be installed using the standard 
+tools, that it passes its tests, and that its documentation is available online 
+(which are all things we'll get to in this tutorial).
 
-The first step is to turn your project directory into a git repository and to 
-commit all the files you've made so far:
+The \texttt{*.rst} suffix means that the file is reStructuredText.  This is a 
+simple file format is supposed to look good as raw text while still being easy 
+to convert to HTML.  The two important things to know are that you can start a 
+new section by underlining the title of that section with equal signs or 
+dashes, and you can enter a block of code by ending the previous paragraph with 
+two colons and indenting the code block.
 
-\begin{bashcode}
-$ git init
-$ git commit -a -m "Initial commit"
-\end{bashcode}
+\kbkdnafile{text}{README.rst}
 
-Next, log into GitHub.  You'll have to create an account if you don't already 
-have one.  Then find the ``New repository'' button and click it.  Give the 
-repository the same name as your project and provide a brief description for 
-it.  The defaults are fine for the rest of the options.
+\organizedsection{use}{Choosing a license}
 
-\begin{figure}[h]
- \frame{\includegraphics[width=\textwidth]{screenshots/github}}
-\end{figure}
+Choosing a license is important because it lets other people know how they can 
+use your code.  The website \url{choosealicense.com} is a good resource where 
+you can compare a number common licenses and find one you like.  The two most 
+common choices for academic code are the MIT license and the GPLv3 license:
 
-The next page will tell you the commands you need to run to connect the 
-repository you made for your project with \texttt{git init} with this new one 
-being hosted by GitHub.  Here are the commands I ran:
+\begin{description}
+\item[MIT License] No restrictions on how your code can be used.  This allows 
+ your code to be included with commercial software.
+\item[GPLv3 License] Requires that any derivatives of your code be made 
+ publicly available.  This effectively forbids your code from being included 
+ with commercial software.
+\end{description}
 
-\begin{bashcode}
-$ git remote add origin git@github.com:kalekundert/kbkdna.git
-$ git push -u origin master
-\end{bashcode}
+Despite my general intellectual preference for the GPLv3 license, I'll use the 
+MIT license for \module{kbkdna} because it's short enough to fit on one page.
+
+\kbkdnafile{text}{LICENSE.txt}
 
 \organizedsection{misc}{Writing some example functions}
 
@@ -190,7 +199,7 @@ python code.  Copy it into \texttt{kbkdna/dna.py}:
 
 \kbkdnafile{python}{kbkdna/dna.py}
 
-Also add the following code to \texttt{kbk/\_\_init\_\_.py}:
+Also add the following code to \texttt{kbkdna/\_\_init\_\_.py}:
 
 \kbkdnafile{python}{kbkdna/__init__.py}
 
@@ -232,6 +241,44 @@ don't bother trying to run it yet.
 
 \kbkdnafile{python}{kbkdna/cli.py}
 
+\organizedsection{use}{Hosting your code on Github}
+
+Version control is useful for many reasons, but two in particular are worth 
+mentioning here.  First, it allows you to go back to old versions of your code 
+if you have to, which allows you to tinker with working code more fearlessly.  
+Second, it makes it easy to share your code with other people and for other 
+people to contribute to your project.  This is especially true if you host your 
+repository on a popular site like \link{GitHub}{https://github.com/}.
+
+The first step is to turn your project directory into a git repository and to 
+commit all the files you've made so far:
+
+\begin{bashcode}
+$ git init
+$ git commit -a -m "Initial commit"
+\end{bashcode}
+
+Next, log into GitHub.  You'll have to create an account if you don't already 
+have one.  Then find the ``New repository'' button and click it.
+
+\begin{center}
+\includegraphics[width=3cm]{screenshots/github_new_repo}
+\end{center}
+
+Give the repository the same name as your project and provide a brief 
+description for it.  The defaults are fine for the rest of the options.
+
+\frame{\includegraphics[width=\textwidth]{screenshots/github_form}}
+
+The next page will tell you the commands you need to run to connect the 
+repository you made for your project with \texttt{git init} with this new one 
+being hosted by GitHub.  Here are the commands I ran:
+
+\begin{bashcode}
+$ git remote add origin git@github.com:kalekundert/kbkdna.git
+$ git push -u origin master
+\end{bashcode}
+
 \organizedsection{use}{Writing a \texttt{setup.py} file}
 
 The best way to install python software that other people have written is to 
@@ -240,7 +287,7 @@ just need to give the name of the software you want to install.  For example,
 here is the command to install \module{docopt}:
 
 \begin{bashcode}
- $ pip install docopt
+$ pip install docopt
 \end{bashcode}
 
 To make this work for our project, we need to specify some additional 
@@ -253,28 +300,30 @@ refer to our project.  The \texttt{packages} field is a list of directories
 containing the python code to install.  The \texttt{install\_requires} field is 
 a list of other packages that our project makes use of.  Whenever our project 
 is installed, these will automatically be installed as well.  The 
-\texttt{entry\_points} field is confusing, but it says we want to create a 
-command-line application called \texttt{dna} to run our \texttt{main()} 
+\texttt{entry\_points} field has a lot going on, but it says we want to create 
+a command-line application called \texttt{dna} to run our \texttt{main()} 
 function.  The rest of the fields are optional metadata and are hopefully 
 pretty self-explanatory.
 
 We can now use \module{pip} to install our project for ourselves:
 
 \begin{bashcode}
- $ pip install -e .
+$ pip install -e .
 \end{bashcode}
 
-The \texttt{-e} flag tells \module{pip} to install your code in \emph{editable} 
-mode, so that any changes we make are automatically applied without us having 
-to rerun the \texttt{install} command.
+The \texttt{-e} flag tells \module{pip} to install our code in ``editable'' 
+mode.  In this mode, our files will be linked (rather than copied) to the 
+installation destination, so any changes we make will immediately be part of 
+the installation.  Without the \texttt{-e} flag, we'd have to rerun the 
+\texttt{install} command every time we wanted to update the installed code.
 
-The advantage of using writing a \texttt{setup.py} file and using \module{pip} 
-to install your code is that it is now available anywhere on your computer.  No 
+The advantage of writing a \texttt{setup.py} file and using \module{pip} like 
+this is that it makes your code usable from anywhere on your computer.  No 
 matter what directory you're in, you can import and run your code.  This may 
-seem like a small thing, but it can make organizing your scripts dramatically 
-easier.  It can also encourage you to make a set of general-purpose utility 
-functions, which can save you time if you tend to write similar functions in 
-many different projects.
+seem like a small thing, but it makes organizing your scripts dramatically 
+easier.  It also makes managing a set of general-purpose utility functions 
+easier, and reusing code between projects like this is a great way to save time 
+and effort.
 
 \organizedsection{use}{Uploading your package to PyPI}
 
@@ -296,64 +345,16 @@ to upload a new version of your project, but you will need to increment the
 version number in \texttt{setup.py} each time.
 
 \begin{bashcode}
- $ python setup.py register
- $ python setup.py sdist upload
+$ python setup.py register
+$ python setup.py sdist upload
 \end{bashcode}
 
-Now anyone should be able to install your code the same way they would install 
-any other code:
+Now anyone should be able to install your code just as they would install any 
+other code:
 
 \begin{bashcode}
- $ pip install kbkdna
+$ pip install kbkdna
 \end{bashcode}
-
-\organizedsection{doc}{Writing a \texttt{README.rst} file}
-
-A \texttt{README} file should briefly explain what the project is supposed to 
-do, how to install it, and how to use it.  I also like to include a few 
-``badges'' to advertise that the project can be installed using the standard 
-tools, that it passes its tests, and that its documentation is available online 
-(which are all things we'll get to in this tutorial).
-
-The \texttt{*.rst} suffix means that the file is reStructuredText.  This is a 
-simple file format is supposed to look good as raw text while still being easy 
-to convert to HTML.  The two important things to know are that you can start a 
-new section by underlining the title of that section with equal signs or 
-dashes, and you enter a block of code by ending the previous paragraph with two 
-colons and indenting the code block.
-
-\kbkdnafile{text}{README.rst}
-
-\organizedsection{use}{Choosing a license}
-
-Choosing a license is important because it lets other people know how they can 
-use your code.  The website \url{choosealicense.com} is a good resource where 
-you can compare a number common licenses and find one you like.  The two most 
-common choices for academic code are the MIT license and the GPLv3 license:
-
-\begin{description}
-\item[MIT License] No restrictions on how your code can be used.  This allows 
- your code to be included with commercial software.
-\item[GPLv3 License] Requires that any derivatives of your code be made 
- publicly available.  This effectively forbids your code from being included 
- with commercial software.
-\end{description}
-
-I'll use the MIT license for \module{kbkdna} because it's short enough to fit 
-on one page.
-
-\kbkdnafile{text}{LICENSE.txt}
-
-\organizedsection{doc}{Writing documentation with Sphinx}
-
-Sphinx is a tool that 
-
-\begin{bashcode}
- $ pip install sphinx
- $ sphinx-quickstart docs
-\end{bashcode}
-
-\organizedsection{doc}{Uploading documentation to ReadTheDocs}
 
 \organizedsection{test}{Writing tests with \module{pytest}}
 
@@ -374,8 +375,8 @@ name also begins with \texttt{test\_}.  Within those functions, use python's
 Install and run \module{pytest} using the following commands:
 
 \begin{bashcode}
- $ pip install pytest
- $ py.test
+$ pip install pytest
+$ py.test
 \end{bashcode}
 
 This should print a big red error message, explaining that the GC content of 
@@ -383,11 +384,10 @@ This should print a big red error message, explaining that the GC content of
 0\%.  This bug is due to integer division in the 
 \mintinline{python}|gc_content()| function, and we can fix it by adding the 
 following line\footnote{It's a good idea to put this line in all of your 
-\texttt{python2} scripts.} right after the shebang line in 
-\texttt{kbkdna/dna.py}:
+\texttt{python2} scripts.} to the beginning of \texttt{kbkdna/dna.py}:
 
 \begin{pythoncode}
- from __future__ import division
+from __future__ import division
 \end{pythoncode}
 
 If you run the tests again, they should pass and you should get a nice green 
@@ -395,7 +395,159 @@ success message.
 
 \organizedsection{test}{Running tests on TravisCI}
 
-\organizedsection{misc}{Using \module{cookiecutter}}
+\link{Travis CI}{https://travis-ci.org/} is a service that runs tests for 
+open-source projects.  Running your tests on Travis CI is a good way to 
+guarantee that your code can be installed and run on other people's computers, 
+and that you didn't accidentally forget to commit a file or list a dependency.
+
+To use Travis CI, we need to make a file called \texttt{.travis.yml} that tells 
+it how to install our project and run our tests:
+
+\kbkdnafile{yaml}{.travis.yml}
+
+The \texttt{python} section specifies which versions of python should be used 
+to test our code.  The \texttt{install} section lists the commands Travis CI 
+needs to run to install our project.  It will automatically clone our 
+repository and \texttt{cd}  into it, so \texttt{pip install .} is all we need 
+to do.  The \texttt{script} section lists the commands needed to run our tests, 
+which in this case is simply \texttt{py.test}.
+
+The next step is to register your project for testing.  You can log into Travis 
+CI with your GitHub account, so just go to \url{https://travis-ci.org} and 
+click the green button that says ``Sign in with Github''.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=4cm]{screenshots/travis_login}
+\end{figure}
+
+Then click on your avatar in the top right corner and you'll be brought to a 
+list of your public repositories on GitHub.  Find \texttt{kbkdna} and flick its 
+switch.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=8cm]{screenshots/travis_switch}
+\end{figure}
+
+This tells Travis CI to test your code every time you push changes to GitHub.  
+You can trigger your first test by committing \texttt{.travis.yml} and pushing.
+
+\begin{bashcode}
+$ git add .travis.yml
+$ git commit -m "Configure Travis CI"
+$ git push
+\end{bashcode}
+
+\organizedsection{doc}{Writing documentation with Sphinx}
+
+\link{Sphinx}{http://www.sphinx-doc.org/} is a tool for generating HTML 
+documentation.  HTML documentation is good because it's ready to be put online, 
+and it supports markup like images and links that make the documentation easier 
+to understand.
+
+To get started with Sphinx, install it and run the \texttt{sphinx-quickstart} 
+command given below.  This will fill in the \texttt{docs} directory with 
+boilerplate files and ask you a number of questions about how you want your 
+documentation configured.  Provide a project name, an author name, and a 
+version number, and say yes when it asks if you want to use the 
+\texttt{autodoc} extension.  Otherwise, accept the defaults.
+
+\begin{bashcode}
+$ pip install sphinx
+$ sphinx-quickstart docs
+\end{bashcode}
+
+You can run the following commands to generate and view your documentation, 
+although you'll just see some generic text since we haven't written anything 
+yet.
+
+\begin{bashcode}
+$ cd docs
+$ make html
+$ firefox _build/html/index.html
+\end{bashcode}
+
+Writing Sphinx documentation is not hard, but the details are beyond the scope 
+of this tutorial.  Refer to 
+\url{http://www.sphinx-doc.org/en/1.5/tutorial.html} for a gentle introduction.  
+You can also draw inspiration from the official python documentation, since 
+it's written using Sphinx and every page has a ``Show source'' link.  I'll also 
+leave you with a simple example that shows how to include your \texttt{README} 
+file in the documentation and how to automatically document the functions we 
+wrote\footnote{This example is not very representative, in large part because 
+Sphinx projects usually span multiple files and have more levels of 
+organization.  But for such a simple project, this is good enough.}.  The 
+latter feature is what the \texttt{autodoc} extension is for.  Copy this into 
+\texttt{docs/index.rst}.
+
+\kbkdnafile{text}{docs/index.rst}
+
+Regenerate the documentation and refresh the page in your browser.  You should 
+see the text from your \texttt{README} file, nicely formatted, followed by 
+descriptions of the four functions that we wrote.
+
+\organizedsection{doc}{Uploading documentation to ReadTheDocs}
+
+\link{ReadTheDocs}{https://readthedocs.org/} is a service that hosts 
+documentation for your projects online.  Using ReadTheDocs is a great way to 
+make your documentation widely available without having to run your own web 
+server.  First, you need to make an account:
+
+\begin{figure}[h]
+ \frame{\includegraphics[width=\textwidth]{screenshots/rtd_sign_up}}
+ \caption{\url{https://readthedocs.org/}}
+\end{figure}
+
+Once you've logged in, click ``Import a Project'' and then ``Connect to 
+GitHub''.  You'll be asked to log into GitHub and to confirm that you want 
+ReadTheDocs to have certain access to your repositories.  When you've done 
+that, go back to the ``Import a project'' page, find \texttt{kbkdna} in your 
+list of repositories, and click it's big plus-sign button.
+
+\includegraphics[width=\textwidth]{screenshots/rtd_plus}
+
+ReadTheDocs will now automatically generate and update the documentation for 
+your project whenever you push to GitHub.
+
+\begin{bashcode}
+$ git add docs/index.rst docs/conf.py docs/Makefile
+$ git commit -m "Add Sphinx documentation."
+$ git push
+\end{bashcode}
+
+\begin{figure}[h]
+ \frame{\includegraphics[width=\textwidth]{screenshots/kbkdna}}
+ \caption{\url{http://kbkdna.readthedocs.io/en/latest/}}
+\end{figure}
+
+\organizedsection{misc}{Starting new projects with \module{cookiecutter}}
+
+We've done a lot to make our code easy for other people to use, but we also had 
+to write a lot of boilerplate code to do it.  This might make the prospect of 
+starting a new project seem daunting.  Fortunately, we can use a tool called 
+\module{cookiecutter}{https://github.com/audreyr/cookiecutter} to write all 
+this boilerplate for us:
+
+\begin{bashcode}
+$ pip install cookiecutter
+$ cookiecutter https://github.com/Kortemme-Lab/python_cookiecutter.git
+\end{bashcode}
+
+When you run this command, it'll ask for a few pieces of information including 
+your name and the name of your project.  It will then use that information to 
+create a new project directory from the template found at the specified URL.  
+The template referenced above mostly follows this tutorial and should be 
+appropriate for any python project.  It includes a \texttt{setup.py} file, a 
+\texttt{main()} function that will be turned into a command-line app, a 
+\texttt{README} file with badges, the GPLv3 license, a Travis CI configuration 
+file, and a ready-to-go Sphinx directory.
+
+Writing python code that's easy to share with others is important, and it 
+shouldn't be hard.  In fact, I've truly found that writing code this way has 
+made my life easier, because doing so builds on robust design patterns that 
+work for the whole community.  I encourage you to put in the time it takes to 
+learn how to do this.  It'll be worth the effort.
 
 \end{document}
 

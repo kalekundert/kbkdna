@@ -3,7 +3,7 @@ FILE=publishing_python_code
 
 all: $(FILE).pdf
 
-$(FILE).pdf: $(FILE).tex kbkdna/setup.py kbkdna/README.rst kbkdna/LICENSE.txt $(wildcard kbkdna/kbkdna/*.py) $(wildcard screenshots/*.png)
+$(FILE).pdf: $(FILE).tex ../setup.py ../README.rst ../LICENSE.txt $(wildcard ../kbkdna/*.py) $(wildcard screenshots/*.png)
 	pdflatex -shell-escape $(FILE)
 	pdflatex -shell-escape $(FILE)
 
