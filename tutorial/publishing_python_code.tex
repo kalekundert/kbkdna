@@ -85,11 +85,16 @@
  \caption{\texttt{\detokenize{#2}}}%
 \end{listing}}
 
+\newcommand{\buggykbkdnafile}[3]{%
+\begin{listing}[h]%
+ \inputminted[fontsize=\small]{#1}{../#2}%
+ \caption{\texttt{\detokenize{#3}}}%
+\end{listing}}
+
 \begin{document}
 
 \title{How to publish python code}
 \author{Kale Kundert}
-\date{2016 Kortemme Lab Retreat}
 \maketitle{}
 
 Once you get some code to work, it's easy to not bother making that code easy 
@@ -197,7 +202,7 @@ Below are the four functions making up the library we want to publish.  Nothing
 about this code is particular to how we will publish it; it's just regular 
 python code.  Copy it into \texttt{kbkdna/dna.py}:
 
-\kbkdnafile{python}{kbkdna/dna.py}
+\buggykbkdnafile{python}{kbkdna/buggy_dna.py}{kbkdna/dna.py}
 
 Also add the following code to \texttt{kbkdna/\_\_init\_\_.py}:
 
